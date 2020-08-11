@@ -1,0 +1,4 @@
+5. MySQL Database & Apache Solr Installation.
+	create database hybris;
+	create user 'hybrisusr'@'localhost' identified by 'hybrispwd';
+	GRANT ALL PRIVILEGES ON hybris.* TO 'hybrisusr'@'localhost';
