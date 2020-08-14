@@ -1,4 +1,131 @@
+Iniciar Solr:
+
+cdominguez@database-solr-instance:~$ cd solr_master/
+cdominguez@database-solr-instance:~/solr_master$ ./bin/solr start
+
+
+
+
+===============================================================================
 5. MySQL Database & Apache Solr Installation.
 	create database hybris;
 	create user 'hybrisusr'@'localhost' identified by 'hybrispwd';
 	GRANT ALL PRIVILEGES ON hybris.* TO 'hybrisusr'@'localhost';
+	
+	CREATE USER 'username'@'localhost' IDENTIFIED BY 'password';
+	
+	GRANT ALL PRIVILEGES ON *.* TO 'hybrisusr'@'localhost' WITH GRANT OPTION;
+	CREATE USER 'hybrisusr'@'%' IDENTIFIED BY 'hybrispwd';
+	GRANT ALL PRIVILEGES ON *.* TO 'hybrisusr'@'%' WITH GRANT OPTION;
+	
+-----------------------------------------------------------------------------
+
+SAP Hybris Configuration - local.properties
+Section Overview
+local.properties
+The following information gives a high level overview of the final local.properties in use for the two Hybris nodes. Note, this configuration will change based on your installation. Be mindful of IP addresses and file paths. 
+
+Important: Use this as a reference, do not copy and paste this file to begin with. Complete the project first and return to this page if you need clarification.
+
+## MySQL Database Parameters ## 
+
+db.url=jdbc:mysql://10.128.0.5/hybris?useConfigs=maxPerformance&characterEncoding=utf8 
+
+db.driver=com.mysql.jdbc.Driver 
+
+db.username=hybrisusr 
+
+db.password=hybrispwd 
+
+db.tableprefix= 
+
+mysql.optional.tabledefs=CHARSET=utf8 COLLATE=utf8_bin 
+
+mysql.tabletype=InnoDB 
+
+
+
+tomcat.generaloptions=-XX:+UseG1GC -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dorg.tanukisoftware.wrapper.WrapperManager.mbean=true -Djava.endorsed.dirs="%CATALINA_HOME%/lib/endorsed" -Dcatalina.base=%CATALINA_BASE% -Dcatalina.home=%CATALINA_HOME% -Dfile.encoding=UTF-8 -Dlog4j.configuration=log4j_init_tomcat.properties -Djava.util.logging.config.file=jdk_logging.properties -Djava.io.tmpdir="${HYBRIS_TEMP_DIR}" -Djava.net.preferIPv4Stack=true -Djava.net.preferIPv6Addresses=false 
+
+tomcat.javaoptions=-javaagent:/home/colinlongworth/hybris/wily/wily/Agent.jar -Dcom.wily.introscope.agentProfile=/home/colinlongworth/hybris/wily/wily/core/config/IntroscopeAgent_tomcat.profile -Dcom.wily.introscope.agent.agentName=hybris_back_office_9009 
+
+## Disable Solr Server Autostart ## 
+
+solrserver.instances.default.autostart=false 
+
+## CLUSTER SET UP ## 
+
+# Activate or deactivate cluster mode 
+
+clustermode=true 
+
+#Set Cluster ID 
+
+cluster.id=0 
+
+#Set Maximum Number of Cluster Nodes 
+
+cluster.maxid=3 
+
+#Set Broadcast Method 
+
+cluster.broadcast.methods=udp 
+
+cluster.broadcast.methods=unicast 
+
+#Define server host name or ip 
+
+cluster.broadcast.method.unicast.serveraddress=10.128.0.4
+
+#Set Server Port 
+
+cluster.broadcast.method.unicast.port=45123 
+
+#Set All Known Nodes 
+
+cluster.broadcast.method.unicast.clusternodes=10.128.0.3:45123 
+
+#Disable Node Sync 
+
+cluster.broadcast.method.unicast.sync.nodes.interval=-1
+
+------------------------------------------------------------------------------------------
+
+SAP Hybris Configuration - Solr Impex
+Section Overview
+The following ImpEx is used to update the Solr Core's and configurations for the Electronics Index during this lecture. You may need to make adjustments in terms of IP addresses and ports.
+
+Important: Udemy has strict content filters that may effect the representation the ImpEx below. Please contact the course instructor if you find errors using the file below.
+
+# FILE BEGINS HERE #
+
+$serverConfigName=clusterSolrServerConfig
+
+# Create the SOLR Server configuration.
+INSERT_UPDATE SolrServerConfig;name[unique=true];mode(code);embeddedMaster
+;$serverConfigName;standalone;false
+
+# Define each node in the Solr Cluster
+INSERT_UPDATE SolrEndpointUrl;solrServerConfig(name)[unique=true];url[unique=true];master[unique=true,default=false]
+
+# Define each node in the Solr Cluster
+
+#NOTICE: Udemy removes URLs. Please replace 'CLUSTER-URL' with the correct HTTP syntax. Message us if you have difficulty.
+
+;$serverConfigName;http://10.128.0.5:8983/solr;true
+;$serverConfigName;http://10.128.0.5:8982/solr;false
+
+# Assign the SOLR Server configuration to our Electronics Index.
+INSERT_UPDATE SolrFacetSearchConfig;name[unique=true];solrServerConfig(name)
+;electronicsIndex;$serverConfigName
+
+
+#FILE ENDS HERE #
+
+
+I Need Help, Who Can I Ask?
+If you have difficulty with any aspect of the course, please feel free to ask on the Udemy course forum.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+/home/cdominguez/hybris/hybris/bin/platform/lib/dbdriver
